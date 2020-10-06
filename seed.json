@@ -1,9 +1,0 @@
-{
-  "_id" : ObjectId("4d3ed089fb60ab534684b7e9"),
-  "albums" : [
-    {
-      "_id" : ObjectId("4d3ed089fb60ab534684b7e0"),
-      "name" : "Violator",
-    }
-  ]
-}
