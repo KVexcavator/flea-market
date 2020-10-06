@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'sinatra/namespace'
 require 'sinatra/reloader' if development?
 require 'mongoid'
 
@@ -65,4 +66,17 @@ end
 get '/refresh' do
   load './seed.rb'
   'Refresh success!'
+end
+
+namespace '/api/v1' do
+
+  before do
+    content_type 'application/json'
+  end
+
+  # get all users to json
+  get '/users' do
+    User.all.to_json
+  end
+
 end
