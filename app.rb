@@ -19,7 +19,6 @@ end
 class User
   include Mongoid::Document 
   field :id, type: String  
-  field :_id, type: String, default: ->{ id }
   field :name, type: String
   field :purse, type: Float 
   embeds_many :gismos
@@ -36,7 +35,6 @@ end
 class Gismo
   include Mongoid::Document
   field :name, type: String
-  field :_id, type: String, default: ->{ name }
   field :quantity, type: Integer 
   field :price, type: Float 
   embedded_in :user 
@@ -71,12 +69,19 @@ end
 namespace '/api/v1' do
 
   before do
-    content_type 'application/json'
+    content_type 'text/xml'
   end
 
   # get all users to json
   get '/users' do
-    User.all.to_json
+    users = User.all
+    
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <root>
+      <names>
+        #{users.distinct(:name)}
+      </names>
+    </root>"
   end
 
 end

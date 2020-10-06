@@ -9,7 +9,9 @@
 - bundle exec ruby app.rb
 - localhost:3000
 ## httpie
-# Inspect setting
+###  Inspect setting
 - http :3000/
-# Clean the database and create the initial data
+###  Clean the database and create the initial data
 - http :3000/refresh
+###  All Users Info
+- http :3000/api/v1/users
