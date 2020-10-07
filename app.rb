@@ -74,27 +74,33 @@ namespace '/api/v1' do
     content_type 'text/xml'
   end
 
-  # get all users to json
+  # get all users to array
   get '/users' do
     @list = User.all.distinct(:name)
     
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <names>
-      #{@list}
+      #{@list.map{|n| n.upcase} }
     </names>"
   end
 
+  # get user info by name
   get '/users/:name' do
     @name = params[:name].capitalize 
     @user = User.where(name: @name )
+    @purse = @user.distinct(:purse).first
+    @gismos = @user.distinct(:gismos).to_json
 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <name>
       #{@name}
     </name>
-    <json>
-      #{@user.to_json}
-    </json>"
+    <purse>
+      #{@purse}
+    </purse>
+    <gismos>
+      #{@gismos}
+    </gismos>"
   end
 
 end

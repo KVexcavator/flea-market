@@ -15,3 +15,5 @@
 - http :3000/refresh
 ###  All Users Info
 - http :3000/api/v1/users
+###  User info
+- http :3000/api/vi/users/naff
