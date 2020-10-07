@@ -2,6 +2,8 @@ require 'sinatra'
 require 'sinatra/namespace'
 require 'sinatra/reloader' if development?
 require 'mongoid'
+require 'bson'
+require 'bson/active_support'
 
 # DB setup
 Mongoid.load!(File.join(File.dirname(__FILE__), 'config', 'mongoid.yml'))
@@ -74,14 +76,25 @@ namespace '/api/v1' do
 
   # get all users to json
   get '/users' do
-    users = User.all
+    @list = User.all.distinct(:name)
     
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-    <root>
-      <names>
-        #{users.distinct(:name)}
-      </names>
-    </root>"
+    <names>
+      #{@list}
+    </names>"
+  end
+
+  get '/users/:name' do
+    @name = params[:name].capitalize 
+    @user = User.where(name: @name )
+
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <name>
+      #{@name}
+    </name>
+    <json>
+      #{@user.to_json}
+    </json>"
   end
 
 end
