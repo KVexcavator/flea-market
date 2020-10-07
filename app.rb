@@ -12,6 +12,7 @@ Mongoid.load!(File.join(File.dirname(__FILE__), 'config', 'mongoid.yml'))
 configure :development do
   #enable :sessions
   # settings.name
+  set :current_user, "Naff"
   set :port, 3000
   set :max_lots, 10
   set :advertising_fee, 100.00
@@ -59,13 +60,19 @@ end
 # Endpoints
 # Inspect setting 
 get '/' do
-  "Port: #{settings.port}, Max lots: #{settings.max_lots}, Advertising fee: #{settings.advertising_fee}"
+  "Port: #{settings.port}, Max lots: #{settings.max_lots}, Advertising fee: #{settings.advertising_fee}, Current User: #{settings.current_user}"
 end
 
 # Clean the database and create the initial data
 get '/refresh' do
   load './seed.rb'
   'Refresh success!'
+end
+
+# login name=[Naff,Niff,Nuff], default-Naff
+post '/login' do
+  settings.current_user = params[:name]
+  "Success Login: #{settings.current_user}!"
 end
 
 namespace '/api/v1' do

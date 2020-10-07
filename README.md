@@ -1,3 +1,4 @@
+# Welcome to game with Naff, Niff and Nuff!
 ## Version
 - ruby-2.7.0 Ubuntu 18.04
 ## Prepare project
@@ -17,3 +18,5 @@
 - http :3000/api/v1/users
 ###  User info
 - http :3000/api/vi/users/naff
+### Login (default Naff, can chenge to Niff or Nuff)
+- http -f POST :3000/login name=Nuff
