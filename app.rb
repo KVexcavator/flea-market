@@ -28,7 +28,6 @@ class User
   embeds_many :gismos
   has_many :lots, foreign_key: 'seller', primary_key: 'name'
 
-  scope :name, -> (name) { where(name: name) }
 end
 
 class Gismo
@@ -37,9 +36,6 @@ class Gismo
   field :quantity, type: Integer 
   field :price, type: Float 
   embedded_in :user 
-
-  scope :name, -> (name) { where(name: name)}
-  scope :quantity, -> (quantity) { where(quantity: quantity)}
 end
 
 class Lot
@@ -48,6 +44,7 @@ class Lot
   field :seller, type: String 
   # dynamically generated
   field :description, type: String 
+  field :total, type: Float 
   # if true user.purse - settings.advertising_fee
   field :advertised, type: Boolean, default: false 
   # user = User.find(id)
@@ -56,6 +53,7 @@ class Lot
   belongs_to :user, foreign_key: 'seller', primary_key: 'name'
 
   scope :seller, -> (seller) { where(seller: seller)}
+  scope :total, -> (total) { where(total: total) }
 end
 
 # Endpoints
@@ -83,14 +81,12 @@ namespace '/api/v1' do
   end
 
   # get all users array names 
-  # get user name params n=Naff 
-  post '/users' do 
-    @users = User.all
-    @users = @users.send(:name, params[:n]) if params[:n]
+  get '/users' do 
+    @users = User.all.distinct(:name)
     
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <names>
-      #{@users.distinct(:name)}
+      #{@users}
     </names>"
   end
 
@@ -115,25 +111,34 @@ namespace '/api/v1' do
 
   # create lot, params - g=gismo, q=quantity, t=total 
   post '/lots' do
-    @g, @q, @t = params[:g], params[:q], params[:t]
+    @g, @q, @t = params[:g], params[:q].to_i, params[:t].to_f
     @current_user = settings.current_user 
-    if User.where(name: @current_user).distinct('gismos.name').include?(@g)
-      @description_lot = "Lot: \n
-        from: #{@current_user} \n
-        gismo:  #{@g} \n
-        quantity: #{@q} \n
-        total:  #{@t}"
+    @gismo_quantity = User.where(name: @current_user)
+      .pluck("gismos.name", "gismos.quantity")
+      .first.first.map {|l| l.to_h}
+      .select {|l| l["name"] == @g }  
+      .first["quantity"].to_i
+
+    if User.where(name: @current_user).distinct('gismos.name').include?(@g) and @q <= @gismo_quantity
+      @description_lot = "Lot: 
+        from: #{@current_user}
+        gismo:  #{@g}
+        quantity: #{@q}"
     end 
-    # creat if save render xml
+    # create if save render xml
+
+      
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <!-- Lot created success -->
-    <g>#{@g}</g><q>#{@q}</q><t>#{@t}</t>
-    <scope_gismo>
-      #{@scope_gismo}
-    </scope_gismo>
+    <gismo_quantity>
+      #{@gismo_quantity}
+    </gismo_quantity>
     <description>
       #{@description_lot}
-    </description>"
+    </description>
+    <total>
+      #{@t}
+    </total>"
 
   end
 

@@ -15,8 +15,7 @@
 ###  Clean the database and create the initial data
 - http :3000/refresh
 ###  All Users Info
-- http -f POST :3000/api/v1/users
-- http -f POST :3000/api/v1/users n=Naff
+- http :3000/api/v1/users
 ###  User info
 - http :3000/api/vi/users/naff
 ###  Login (default Naff, can use Naff or Niff or Nuff)
