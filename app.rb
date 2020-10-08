@@ -119,26 +119,32 @@ namespace '/api/v1' do
       .select {|l| l["name"] == @g }  
       .first["quantity"].to_i
 
+    # validate gismo-name and quantity
+    # update date gismos
+    # create  and render lot 
     if User.where(name: @current_user).distinct('gismos.name').include?(@g) and @q <= @gismo_quantity
       @description_lot = "Lot: 
         from: #{@current_user}
         gismo:  #{@g}
         quantity: #{@q}"
-    end 
-    # create if save render xml
 
-      
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-    <!-- Lot created success -->
-    <gismo_quantity>
-      #{@gismo_quantity}
-    </gismo_quantity>
-    <description>
-      #{@description_lot}
-    </description>
-    <total>
-      #{@t}
-    </total>"
+      @gismo_quantity -= @q
+      User.where(name: @current_user)
+        .where(gismos: {"gismos.name": @g})
+        .update("gismos.quantity": @gismo_quantity)
+      Lot.create!(seller: @current_user, description: @description_lot, total: @t)
+
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+      <!-- Lot created success -->
+      <description>
+        #{@description_lot}
+      </description>
+      <total>
+        #{@t}
+      </total>"
+    else
+      "Lot not create"
+    end 
 
   end
 
