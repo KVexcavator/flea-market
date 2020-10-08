@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'sinatra/namespace'
 require 'sinatra/reloader' if development?
+require 'byebug' if development? # byebug
 require 'mongoid'
 require 'bson'
 require 'bson/active_support'
@@ -27,12 +28,7 @@ class User
   embeds_many :gismos
   has_many :lots, foreign_key: 'seller', primary_key: 'name'
 
-  # get '/login/:id'
-  # session[:user_id] = params[:id]
-  # User.find_by_session(session[:user_id])
-  def self.find_by_session(id)
-    where(id: id).first
-  end
+  scope :name, -> (name) { where(name: name) }
 end
 
 class Gismo
@@ -41,6 +37,9 @@ class Gismo
   field :quantity, type: Integer 
   field :price, type: Float 
   embedded_in :user 
+
+  scope :name, -> (name) { where(name: name)}
+  scope :quantity, -> (quantity) { where(quantity: quantity)}
 end
 
 class Lot
@@ -53,8 +52,10 @@ class Lot
   field :advertised, type: Boolean, default: false 
   # user = User.find(id)
   # user.lots 
-  # looks up emails where lots.seller == user.name
+  # looks up lot where lots.seller == user.name
   belongs_to :user, foreign_key: 'seller', primary_key: 'name'
+
+  scope :seller, -> (seller) { where(seller: seller)}
 end
 
 # Endpoints
@@ -81,13 +82,15 @@ namespace '/api/v1' do
     content_type 'text/xml'
   end
 
-  # get all users to array
-  get '/users' do
-    @list = User.all.distinct(:name)
+  # get all users array names 
+  # get user name params n=Naff 
+  post '/users' do 
+    @users = User.all
+    @users = @users.send(:name, params[:n]) if params[:n]
     
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <names>
-      #{@list.map{|n| n.upcase} }
+      #{@users.distinct(:name)}
     </names>"
   end
 
@@ -109,5 +112,30 @@ namespace '/api/v1' do
       #{@gismos}
     </gismos>"
   end
+
+  # create lot, params - g=gismo, q=quantity, t=total 
+  post '/lots' do
+    @g, @q, @t = params[:g], params[:q], params[:t]
+    @current_user = settings.current_user 
+    if User.where(name: @current_user).distinct('gismos.name').include?(@g)
+      @description_lot = "Lot: \n
+        from: #{@current_user} \n
+        gismo:  #{@g} \n
+        quantity: #{@q} \n
+        total:  #{@t}"
+    end 
+    # creat if save render xml
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <!-- Lot created success -->
+    <g>#{@g}</g><q>#{@q}</q><t>#{@t}</t>
+    <scope_gismo>
+      #{@scope_gismo}
+    </scope_gismo>
+    <description>
+      #{@description_lot}
+    </description>"
+
+  end
+
 
 end
