@@ -21,8 +21,9 @@
 ###  Login (default Naff, can use Naff or Niff or Nuff)
 - http -f POST :3000/login name=Nuff
 ###  Create Lot
-- http -f POST :3000/api/v1/lots g=Lion q=5 t=40.00
+- http -f POST :3000/api/v1/lot g=Lion q=5 t=40.00
 ###  Delete Lot
 ###  Add Lot to advertise list
 ###  All advertise lots
+- http :3000/api/v1/lots
 ###  Pay a Gismo from User

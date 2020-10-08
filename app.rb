@@ -90,6 +90,15 @@ namespace '/api/v1' do
     </names>"
   end
 
+  # get lots
+  get '/lots' do
+    @lots = Lot.all.pluck(:description, :total) 
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <names>
+      #{@lots}
+    </names>"
+  end
+
   # get user info by name
   get '/users/:name' do
     @name = params[:name].capitalize 
@@ -110,7 +119,7 @@ namespace '/api/v1' do
   end
 
   # create lot, params - g=gismo, q=quantity, t=total 
-  post '/lots' do
+  post '/lot' do
     @g, @q, @t = params[:g], params[:q].to_i, params[:t].to_f
     @current_user = settings.current_user 
     @gismo_quantity = User.where(name: @current_user)
