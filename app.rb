@@ -14,6 +14,7 @@ configure :development do
   #enable :sessions
   # settings.name
   set :current_user, "Naff"
+  @@current = settings.current_user
   set :port, 3000
   set :max_lots, 10
   set :advertising_fee, 100.00
@@ -28,6 +29,9 @@ class User
   embeds_many :gismos
   has_many :lots, foreign_key: 'seller', primary_key: 'name'
 
+  def self.current
+    where(name: @@current)
+  end
 end
 
 class Gismo
@@ -51,6 +55,10 @@ class Lot
   # user.lots 
   # looks up lot where lots.seller == user.name
   belongs_to :user, foreign_key: 'seller', primary_key: 'name'
+  
+  def self.advertised
+    where(advertised: true)
+  end
 
   scope :seller, -> (seller) { where(seller: seller)}
   scope :total, -> (total) { where(total: total) }
@@ -66,6 +74,15 @@ end
 get '/refresh' do
   load './seed.rb'
   'Refresh success!'
+end
+
+# test model methods
+get '/test' do
+  @test = User.current
+  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+  <test>
+    #{@test.to_json}
+  </test>"
 end
 
 # login name=[Naff,Niff,Nuff], default-Naff
