@@ -21,25 +21,24 @@ configure :development do
 end
 
 # Models
-class User
+class Player
   include Mongoid::Document 
-  field :id, type: String  
-  field :name, type: String
+  field :nik, type: String
   field :purse, type: Float 
   embeds_many :gismos
-  has_many :lots, foreign_key: 'seller', primary_key: 'name'
+  has_many :lots, foreign_key: 'seller', primary_key: 'nik'
 
   def self.current
-    where(name: @@current)
+    where(nik: @@current)
   end
 end
 
 class Gismo
   include Mongoid::Document
-  field :name, type: String
+  field :title, type: String
   field :quantity, type: Integer 
   field :price, type: Float 
-  embedded_in :user 
+  embedded_in :player
 end
 
 class Lot
@@ -51,10 +50,10 @@ class Lot
   field :total, type: Float 
   # if true user.purse - settings.advertising_fee
   field :advertised, type: Boolean, default: false 
-  # user = User.find(id)
-  # user.lots 
-  # looks up lot where lots.seller == user.name
-  belongs_to :user, foreign_key: 'seller', primary_key: 'name'
+  # player = Player.find_ny(name: "Naff")
+  # player.lots 
+  # looks up lot where lots.seller == player.nik 
+  belongs_to :player, foreign_key: 'seller', primary_key: 'nik'
   
   def self.advertised
     where(advertised: true)
@@ -78,7 +77,7 @@ end
 
 # test model methods
 get '/test' do
-  @test = User.current
+  @test =  Player.all 
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <test>
     #{@test.to_json}
@@ -87,7 +86,7 @@ end
 
 # login name=[Naff,Niff,Nuff], default-Naff
 post '/login' do
-  settings.current_user = params[:name]
+  settings.current_user = params[:nik]
   "Success Login: #{settings.current_user}!"
 end
 
@@ -97,36 +96,36 @@ namespace '/api/v1' do
     content_type 'text/xml'
   end
 
-  # get all users array names 
-  get '/users' do 
-    @users = User.all.distinct(:name)
+  # get all players array niks 
+  get '/players' do 
+    @players = Player.all.distinct(:nik)
     
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-    <names>
-      #{@users}
-    </names>"
+    <niks>
+      #{@players}
+    </niks>"
   end
 
   # get lots
   get '/lots' do
     @lots = Lot.all.pluck(:description, :total) 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-    <names>
+    <lots>
       #{@lots}
-    </names>"
+    </lots>"
   end
 
-  # get user info by name
-  get '/users/:name' do
-    @name = params[:name].capitalize 
-    @user = User.where(name: @name )
-    @purse = @user.distinct(:purse).first
-    @gismos = @user.distinct(:gismos).to_json
+  # get player info by nik 
+  get '/players/:nik' do
+    @nik = params[:nik].capitalize 
+    @player = Player.current 
+    @purse = @player.distinct(:purse).first
+    @gismos = @player.distinct(:gismos).to_json
 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-    <name>
-      #{@name}
-    </name>
+    <nik>
+      #{@nik}
+    </nik>
     <purse>
       #{@purse}
     </purse>
@@ -138,25 +137,22 @@ namespace '/api/v1' do
   # create lot, params - g=gismo, q=quantity, t=total 
   post '/lot' do
     @g, @q, @t = params[:g], params[:q].to_i, params[:t].to_f
-    @current_user = settings.current_user 
-    @gismo_quantity = User.where(name: @current_user)
-      .pluck("gismos.name", "gismos.quantity")
+    @current_user = settings.current_user
+    @gismo_quantity = Player.current
+      .pluck("gismos.title", "gismos.quantity")
       .first.first.map {|l| l.to_h}
-      .select {|l| l["name"] == @g }  
+      .select {|l| l["title"] == @g }  
       .first["quantity"].to_i
 
-    # validate gismo-name and quantity
+    # validate title and quantity
     # update date gismos
     # create  and render lot 
-    if User.where(name: @current_user).distinct('gismos.name').include?(@g) and @q <= @gismo_quantity
-      @description_lot = "Lot: 
-        from: #{@current_user}
-        gismo:  #{@g}
-        quantity: #{@q}"
+    if Player.current.distinct('gismos.title').include?(@g) and @q <= @gismo_quantity
+      @description_lot = "Lot: from:#{@current_user}, gismos:#{@g}, quantity:#{@q}"
 
       @gismo_quantity -= @q
-      User.where(name: @current_user)
-        .where(gismos: {"gismos.name": @g})
+      Player.current
+        .where(gismos: {"gismos.title": @g})
         .update("gismos.quantity": @gismo_quantity)
       Lot.create!(seller: @current_user, description: @description_lot, total: @t)
 

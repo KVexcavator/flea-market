@@ -14,16 +14,16 @@
 - http :3000/
 ###  Clean the database and create the initial data
 - http :3000/refresh
-###  All Users Info
-- http :3000/api/v1/users
-###  User info
-- http :3000/api/vi/users/naff
+###  All Players Info
+- http :3000/api/v1/players
+###  Player info
+- http :3000/api/vi/players/naff
 ###  Login (default Naff, can use Naff or Niff or Nuff)
-- http -f POST :3000/login name=Nuff
+- http -f POST :3000/login nik=Nuff
 ###  Create Lot
 - http -f POST :3000/api/v1/lot g=Lion q=5 t=40.00
 ###  Delete Lot
 ###  Add Lot to advertise list
 ###  All advertise lots
 - http :3000/api/v1/lots
-###  Pay a Gismo from User
+###  Pay a Gismo from Player
