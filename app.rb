@@ -77,11 +77,16 @@ end
 
 # test model methods
 get '/test' do
-  @test =  Player.all 
+  @test = Player.current.first.gismos.where(title: "Elephant").first.quantity.class 
+
+  @atr =  Player.current.first.attributes
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <test>
-    #{@test.to_json}
-  </test>"
+    #{@test}
+  </test>
+  <attribute>
+    #{@atr}
+  </attribute>"
 end
 
 # login name=[Naff,Niff,Nuff], default-Naff
@@ -96,7 +101,8 @@ namespace '/api/v1' do
     content_type 'text/xml'
   end
 
-  # get all players array niks 
+  # et al playerruby app.rb
+  # array niks 
   get '/players' do 
     @players = Player.all.distinct(:nik)
     
@@ -138,22 +144,16 @@ namespace '/api/v1' do
   post '/lot' do
     @g, @q, @t = params[:g], params[:q].to_i, params[:t].to_f
     @current_user = settings.current_user
-    @gismo_quantity = Player.current
-      .pluck("gismos.title", "gismos.quantity")
-      .first.first.map {|l| l.to_h}
-      .select {|l| l["title"] == @g }  
-      .first["quantity"].to_i
+    @reserve = @test = Player.current.first.gismos.where(title: @g).first.quantity
 
     # validate title and quantity
     # update date gismos
     # create  and render lot 
-    if Player.current.distinct('gismos.title').include?(@g) and @q <= @gismo_quantity
+    if Player.current.distinct('gismos.title').include?(@g) and @q <= @reserve
       @description_lot = "Lot: from:#{@current_user}, gismos:#{@g}, quantity:#{@q}"
 
-      @gismo_quantity -= @q
-      Player.current
-        .where(gismos: {"gismos.title": @g})
-        .update("gismos.quantity": @gismo_quantity)
+      @reserve -= @q
+      Player.current.first.gismos.where(title: @g).update(quantity: @reserve)
       Lot.create!(seller: @current_user, description: @description_lot, total: @t)
 
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
