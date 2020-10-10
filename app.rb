@@ -84,6 +84,7 @@ get '/test' do
     Player.each {|p| t << p.nik}
     t
   end 
+  #@test = niks_all 
   def get_ids_gismo(title)
     ids = []
     niks_all.each do |n|
@@ -96,7 +97,26 @@ get '/test' do
     end
     ids
   end 
-  @test = get_ids_gismo("Elephant")
+  #@test = get_ids_gismo("Elephant")
+  def lots_discriptions_all
+    t = []
+    Lot.each {|d| t << d.description}
+    t
+  end
+  #@test = lots_discriptions_all
+  def get_ids_lots(title)
+    ids = []
+    lots_discriptions_all.select{|d| d.include? title}.each do |d|
+      s = []
+      s << Lot.where(description: d).first 
+      s.compact.each do |lot|
+        ids << lot.id.to_s
+      end
+    end 
+    ids
+  end
+  @test = get_ids_lots("Hippo")
+
 
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <test>
@@ -136,6 +156,24 @@ namespace '/api/v1' do
       end
       ids
     end 
+
+    def lots_discriptions_all
+      t = []
+      Lot.each {|d| t << d.description}
+      t
+    end
+
+    def get_ids_lots(title)
+      ids = []
+      lots_discriptions_all.select{|d| d.include? title}.each do |d|
+        s = []
+        s << Lot.where(description: d).first 
+        s.compact.each do |lot|
+          ids << lot.id.to_s
+        end
+      end 
+      ids
+    end
 
   end
 
@@ -207,10 +245,22 @@ namespace '/api/v1' do
 
   end
 
-  # loock up a lot, gismo by gismo title in the lot's discription and tne player's gismos
-  # g=gismo-title 
+  # loock up a lot and gismos by gismo title 
+  # in the lot's discription and tne player's gismos
   # return arrays id
-  post '/bargain' do
+  get '/bargain/:title' do
+
+    @ids_gismos = get_ids_gismo(params[:title].capitalize)
+    @ids_lots = get_ids_lots(params[:title].capitalize)
+
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <!-- Result id-->
+    <gismos>
+      #{@ids_gismos}
+    </gismos>
+    <lots>
+      #{@ids_lots}
+    </lots>"
 
   end
 

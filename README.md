@@ -24,6 +24,8 @@
 - http -f POST :3000/api/v1/lot g=Lion q=5 t=40.00
 ###  Delete Lot
 ###  Add Lot to advertise list
-###  All advertise lots
+###  All lots
 - http :3000/api/v1/lots
+###  All id to bargain
+- http :3000/api/v1//bargain/lion
 ###  Pay a Gismo from Player
