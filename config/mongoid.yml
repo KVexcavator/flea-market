@@ -7,4 +7,3 @@ development:
       options:
         server_selection_timeout: 1
         include_root_in_json: true
-        include_type_for_serialization: true

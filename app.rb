@@ -50,7 +50,7 @@ class Lot
   field :total, type: Float 
   # if true user.purse - settings.advertising_fee
   field :advertised, type: Boolean, default: false 
-  # player = Player.find_ny(name: "Naff")
+  # player = Player.find_by(name: "Naff")
   # player.lots 
   # looks up lot where lots.seller == player.nik 
   belongs_to :player, foreign_key: 'seller', primary_key: 'nik'
@@ -77,16 +77,25 @@ end
 
 # test model methods
 get '/test' do
-  @test = Player.current.first.gismos.where(title: "Elephant").first.quantity.class 
+  #@test = Player.current.first.gismos.where(title: "Elephant").first.quantity.class 
+  #@test =  Player.current.first.attributes
 
-  @atr =  Player.current.first.attributes
+  #@niks.each do |n|
+    #@test << Player.where(nik: n).first.gismos
+  #end
+  
+  def array_players
+    t = []
+    Player.each {|p| t << p.nik}
+    t
+  end 
+  @test = array_players
+
+
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <test>
     #{@test}
-  </test>
-  <attribute>
-    #{@atr}
-  </attribute>"
+  </test>"
 end
 
 # login name=[Naff,Niff,Nuff], default-Naff
@@ -101,10 +110,20 @@ namespace '/api/v1' do
     content_type 'text/xml'
   end
 
+  helpers do
+  
+    def array_players
+      t = []
+      Player.each {|p| t << p.nik}
+      t
+    end 
+
+  end
+
   # et al playerruby app.rb
   # array niks 
   get '/players' do 
-    @players = Player.all.distinct(:nik)
+    @players = array_players #Player.all.distinct(:nik)
     
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <niks>
@@ -114,7 +133,7 @@ namespace '/api/v1' do
 
   # get lots
   get '/lots' do
-    @lots = Lot.all.pluck(:description, :total) 
+    @lots = Lot.all.pluck(:description, :total, :advertised) 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <lots>
       #{@lots}
@@ -167,6 +186,23 @@ namespace '/api/v1' do
     else
       "Lot not create"
     end 
+
+  end
+
+  # loock up a lot, gismo by gismo title in the lot's discription and tne player's gismos
+  # g=gismo-title 
+  # return arrays id
+  post '/bargain' do
+
+  end
+
+  # buy lot
+  post '/bargain/lots/:id' do
+
+  end
+
+  # buy gismo 
+  post '/bargain/:id' do
 
   end
 
