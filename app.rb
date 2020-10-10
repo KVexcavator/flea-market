@@ -79,18 +79,24 @@ end
 get '/test' do
   #@test = Player.current.first.gismos.where(title: "Elephant").first.quantity.class 
   #@test =  Player.current.first.attributes
-
-  #@niks.each do |n|
-    #@test << Player.where(nik: n).first.gismos
-  #end
-  
-  def array_players
+  def niks_all
     t = []
     Player.each {|p| t << p.nik}
     t
   end 
-  @test = array_players
-
+  def get_ids_gismo(title)
+    ids = []
+    niks_all.each do |n|
+      s = []
+      s << Player.where(nik: n).first.gismos
+        .where(title: title).first
+      s.compact.each do |gismo|
+        ids << gismo.id.to_s
+      end
+    end
+    ids
+  end 
+  @test = get_ids_gismo("Elephant")
 
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <test>
@@ -112,18 +118,30 @@ namespace '/api/v1' do
 
   helpers do
   
-    def array_players
+    def niks_all 
       t = []
       Player.each {|p| t << p.nik}
       t
     end 
 
+    def get_ids_gismo(title)
+      ids = []
+      niks_all.each do |n|
+        s = []
+        s << Player.where(nik: n).first.gismos
+          .where(title: title).first
+        s.compact.each do |gismo|
+          ids << gismo.id.to_s
+        end
+      end
+      ids
+    end 
+
   end
 
-  # et al playerruby app.rb
-  # array niks 
+  # players array 
   get '/players' do 
-    @players = array_players #Player.all.distinct(:nik)
+    @players = niks_all 
     
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <niks>
