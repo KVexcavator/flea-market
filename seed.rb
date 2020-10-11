@@ -32,3 +32,9 @@ Player.create!(nik: "Nuff", purse: 200.00, gismos: [
   Gismo.new(title: "Chamomile", quantity: 40, price: 1.00)
 ])
 
+Lot.create!(seller: "Naff", description: "Gismos: Lily quantity: 11", total: 70.00)
+Lot.create!(seller: "Naff", description: "Gismos: Bottle quantity: 7", total: 20.00)
+Lot.create!(seller: "Niff", description: "Gismos: Orchid quantity: 3", total: 15.00)
+Lot.create!(seller: "Niff", description: "Gismos: Wolf quantity: 12", total: 400.00)
+Lot.create!(seller: "Niff", description: "Gismos: Plate quantity: 4", total: 55.00)
+Lot.create!(seller: "Nuff", description: "Gismos: Elephant quantity: 2", total: 35.00)

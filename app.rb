@@ -79,44 +79,7 @@ end
 get '/test' do
   #@test = Player.current.first.gismos.where(title: "Elephant").first.quantity.class 
   #@test =  Player.current.first.attributes
-  def niks_all
-    t = []
-    Player.each {|p| t << p.nik}
-    t
-  end 
-  #@test = niks_all 
-  def get_ids_gismo(title)
-    ids = []
-    niks_all.each do |n|
-      s = []
-      s << Player.where(nik: n).first.gismos
-        .where(title: title).first
-      s.compact.each do |gismo|
-        ids << gismo.id.to_s
-      end
-    end
-    ids
-  end 
-  #@test = get_ids_gismo("Elephant")
-  def lots_discriptions_all
-    t = []
-    Lot.each {|d| t << d.description}
-    t
-  end
-  #@test = lots_discriptions_all
-  def get_ids_lots(title)
-    ids = []
-    lots_discriptions_all.select{|d| d.include? title}.each do |d|
-      s = []
-      s << Lot.where(description: d).first 
-      s.compact.each do |lot|
-        ids << lot.id.to_s
-      end
-    end 
-    ids
-  end
-  @test = get_ids_lots("Hippo")
-
+  @test = seller_purse
 
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <test>
@@ -157,7 +120,7 @@ namespace '/api/v1' do
       ids
     end 
 
-    def lots_discriptions_all
+    def lots_descriptions_all
       t = []
       Lot.each {|d| t << d.description}
       t
@@ -165,7 +128,7 @@ namespace '/api/v1' do
 
     def get_ids_lots(title)
       ids = []
-      lots_discriptions_all.select{|d| d.include? title}.each do |d|
+      lots_descriptions_all.select{|d| d.include? title}.each do |d|
         s = []
         s << Lot.where(description: d).first 
         s.compact.each do |lot|
@@ -225,7 +188,7 @@ namespace '/api/v1' do
     # update date gismos
     # create  and render lot 
     if Player.current.distinct('gismos.title').include?(@g) and @q <= @reserve
-      @description_lot = "Lot: from:#{@current_user}, gismos:#{@g}, quantity:#{@q}"
+      @description_lot = "Gismos: #{@g} quantity: #{@q}"
 
       @reserve -= @q
       Player.current.first.gismos.where(title: @g).update(quantity: @reserve)
@@ -246,7 +209,7 @@ namespace '/api/v1' do
   end
 
   # loock up a lot and gismos by gismo title 
-  # in the lot's discription and tne player's gismos
+  # in the lot's description and tne player's gismos
   # return arrays id
   get '/bargain/:title' do
 
@@ -266,7 +229,23 @@ namespace '/api/v1' do
 
   # buy lot
   post '/bargain/lots/:id' do
+    
+    lot = Lot.find(params[:id])
+    seller = lot.seller 
+    seller_purse = Player.where(nik: seller).first.purse  
+    total = lot.total
+    purse = Player.current.first.purse 
+    if @@current == seller or purse < total
+      raise "Transaction not available" 
+    end
+    lot.update(seller: @@current) 
+    seller_purse += total 
+    purse -= total 
+    Player.current.first.update(purse: purse)
+    Player.where(nik: seller).first.update(purse: seller_purse)
 
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <!--Success-->"
   end
 
   # buy gismo 
