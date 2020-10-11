@@ -36,8 +36,8 @@ end
 class Gismo
   include Mongoid::Document
   field :title, type: String
-  field :quantity, type: Integer 
-  field :price, type: Float 
+  field :quantity, type: Integer, default: 0 
+  field :price, type: Float, default: 50.00 
   embedded_in :player
 end
 
@@ -79,7 +79,7 @@ end
 get '/test' do
   #@test = Player.current.first.gismos.where(title: "Elephant").first.quantity.class 
   #@test =  Player.current.first.attributes
-  @test = seller_purse
+  @test = Player.all.to_json 
 
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <test>
@@ -105,19 +105,6 @@ namespace '/api/v1' do
       t = []
       Player.each {|p| t << p.nik}
       t
-    end 
-
-    def get_ids_gismo(title)
-      ids = []
-      niks_all.each do |n|
-        s = []
-        s << Player.where(nik: n).first.gismos
-          .where(title: title).first
-        s.compact.each do |gismo|
-          ids << gismo.id.to_s
-        end
-      end
-      ids
     end 
 
     def lots_descriptions_all
@@ -208,19 +195,14 @@ namespace '/api/v1' do
 
   end
 
-  # loock up a lot and gismos by gismo title 
-  # in the lot's description and tne player's gismos
+  # loock up a lot  by gismo title 
   # return arrays id
   get '/bargain/:title' do
 
-    @ids_gismos = get_ids_gismo(params[:title].capitalize)
     @ids_lots = get_ids_lots(params[:title].capitalize)
 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <!-- Result id-->
-    <gismos>
-      #{@ids_gismos}
-    </gismos>
     <lots>
       #{@ids_lots}
     </lots>"
@@ -247,11 +229,5 @@ namespace '/api/v1' do
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <!--Success-->"
   end
-
-  # buy gismo 
-  post '/bargain/:id' do
-
-  end
-
 
 end

@@ -30,4 +30,3 @@
 - http :3000/api/v1/bargain/lion
 ###  Pay Lot
 - http :3000/api/v1/bargain/lots/:id
-###  Pay a Gismo from Player
